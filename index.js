@@ -70,13 +70,13 @@ async function run() {
     });
 
     // PUT UPDATE API
-    app.get(`/coffee/:id`, async (req, res) => {
-      const id = req.params.id;
-      const query = { _id: new ObjectId(id) };
-      const result = await coffeeCollection.findOne(query);
+    // app.get(`/coffee/:id`, async (req, res) => {
+    //   const id = req.params.id;
+    //   const query = { _id: new ObjectId(id) };
+    //   const result = await coffeeCollection.findOne(query);
 
-      res.send(result);
-    });
+    //   res.send(result);
+    // });
 
     app.put("/coffee/:id", async (req, res) => {
       const id = req.params.id;
@@ -95,7 +95,7 @@ async function run() {
       };
       const options = { upsert: true };
       const result = await coffeeCollection.updateOne(
-        query,
+        filter,
         updatedCoffee,
         options
       );
