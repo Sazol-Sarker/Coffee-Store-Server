@@ -8,11 +8,9 @@ const port = process.env.PORT || 5000;
 
 // MIDDLEWARE
 app.use(cors());
-app.use(express.json());//req body parser
+app.use(express.json()); //req body parser
 
-
-const uri =
-  `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.uomr8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.uomr8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
@@ -33,69 +31,77 @@ async function run() {
     const coffeeCollection = coffeeHub.collection("coffeeCollection");
 
     // ALL server to MongoDB APIs
-// GET API
-app.get('/coffee',async(req,res)=>{
-  const cursor=coffeeCollection.find()
-  const result=await cursor.toArray()
+    // GET (ALL) API
+    app.get("/coffee", async (req, res) => {
+      const cursor = coffeeCollection.find();
+      const result = await cursor.toArray();
 
-  res.send(result)
-})
+      res.send(result);
+    });
+    // GET specific coffee API
+    app.get('/coffee/:id',async(req,res)=>{
+      const id=req.params.id;
+      console.log(typeof id);
+      const query={_id:new ObjectId(id)}
+      const result=await  coffeeCollection.findOne(query)
+      console.log(result);
+      res.send(result)
+    })
 
 
     // POST API
-    app.post('/coffee',async(req,res)=>{
-        console.log("Client data in server:=> ",req.body);
+    app.post("/coffee", async (req, res) => {
+      console.log("Client data in server:=> ", req.body);
 
-        const result=await coffeeCollection.insertOne(req.body)
+      const result = await coffeeCollection.insertOne(req.body);
 
-
-        res.send(result)
-    })
+      res.send(result);
+    });
 
     // DELETE API
-    app.delete('/coffee/:id',async(req,res)=>{
-      const id=req.params.id;
-      console.log("id got from client=>",id);
-      const query={_id:new ObjectId(id)}
+    app.delete("/coffee/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("id got from client=>", id);
+      const query = { _id: new ObjectId(id) };
 
-      const result=await coffeeCollection.deleteOne(query)
+      const result = await coffeeCollection.deleteOne(query);
 
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     // PUT UPDATE API
-    app.get(`/coffee/:id`,async(req,res)=>{
-      const id=req.params.id;
-      const query={_id:new ObjectId(id)}
-      const result=await coffeeCollection.findOne(query)
+    app.get(`/coffee/:id`, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await coffeeCollection.findOne(query);
 
-      res.send(result)
+      res.send(result);
+    });
 
-    })
-
-    app.put('/coffee/:id',async(req,res)=>{
-      const id=req.params.id;
-      const filter = { _id:new ObjectId(id) };
-      const updCoffee=req.body
-      const updatedCoffee={
-        $set:{
-          name:updCoffee.name,
-          chefName:updCoffee.chefName,
-          supplierName:updCoffee.supplierName,
-          taste:updCoffee.taste,
-          categoryName:updCoffee.categoryName,
-          detailsName:updCoffee.detailsName,
-          photoURL:updCoffee.photoURL,
-        }
-      }
+    app.put("/coffee/:id", async (req, res) => {
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id) };
+      const updCoffee = req.body;
+      const updatedCoffee = {
+        $set: {
+          name: updCoffee.name,
+          chefName: updCoffee.chefName,
+          supplierName: updCoffee.supplierName,
+          taste: updCoffee.taste,
+          categoryName: updCoffee.categoryName,
+          detailsName: updCoffee.detailsName,
+          photoURL: updCoffee.photoURL,
+        },
+      };
       const options = { upsert: true };
-      const result=await coffeeCollection.updateOne(query,updatedCoffee,options)
+      const result = await coffeeCollection.updateOne(
+        query,
+        updatedCoffee,
+        options
+      );
 
-      res.send(result)
-
-    })
-
-
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
