@@ -103,6 +103,20 @@ async function run() {
       res.send(result);
     });
 
+
+    /*************** USER API */
+    const userCollection = coffeeHub.collection("userCollection");
+
+    app.post('/users',async(req,res)=>{
+      const user=req.body;
+      console.log("Response from client to server:=>",user);
+      // send to DB
+      const result=await userCollection.insertOne(user)
+
+      //Final/last response to client
+      res.send(result)
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log(
