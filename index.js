@@ -106,7 +106,14 @@ async function run() {
 
     /*************** USER API */
     const userCollection = coffeeHub.collection("userCollection");
+    // GET USERS ALL
+    app.get('/users',async(req,res)=>{
+      const query=userCollection.find()
+      const result=await query.toArray()
+      res.send(result)
+    })
 
+    // CREATE USER=> POST API
     app.post('/users',async(req,res)=>{
       const user=req.body;
       console.log("Response from client to server:=>",user);
@@ -116,6 +123,19 @@ async function run() {
       //Final/last response to client
       res.send(result)
     })
+
+    // DELETE (Single) api
+    app.delete('/users/:id',async(req,res)=>{
+      const id=req.params.id;
+      console.log('ID got from client=>',id);
+
+      // send delete instruction to DB
+      const query={_id:new ObjectId(id)}
+      const result=await userCollection.deleteOne(query)
+
+      res.send(result)
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
