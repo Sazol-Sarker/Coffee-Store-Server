@@ -136,6 +136,23 @@ async function run() {
       res.send(result)
     })
 
+    // UPDATE edit api: user
+    app.patch('/users',async(req,res)=>{
+      const email=req.body.email;
+      const query={email:email}
+
+      const updatedUser={
+        $set:{
+          email:email,
+          lastSignInTime:req.body.lastSignInTime
+        }
+      }
+      const result=await userCollection.updateOne(query,updatedUser)
+
+      res.send(result)
+
+    })
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
