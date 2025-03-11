@@ -7,7 +7,16 @@ const cors = require("cors");
 const port = process.env.PORT || 5000;
 
 // MIDDLEWARE
-app.use(cors());
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://coffee-store-4ab55.web.app",
+      "https://coffee-store-4ab55.firebaseapp.com",
+    ],
+    credentials: true,
+  })
+);
 app.use(express.json()); //req body parser
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.uomr8.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -24,7 +33,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
 
     // CREATE DATABASE,COLLECTION
     const coffeeHub = client.db("coffeeDB");
@@ -39,15 +48,14 @@ async function run() {
       res.send(result);
     });
     // GET specific coffee API
-    app.get('/coffee/:id',async(req,res)=>{
-      const id=req.params.id;
+    app.get("/coffee/:id", async (req, res) => {
+      const id = req.params.id;
       console.log(typeof id);
-      const query={_id:new ObjectId(id)}
-      const result=await  coffeeCollection.findOne(query)
+      const query = { _id: new ObjectId(id) };
+      const result = await coffeeCollection.findOne(query);
       console.log(result);
-      res.send(result)
-    })
-
+      res.send(result);
+    });
 
     // POST API
     app.post("/coffee", async (req, res) => {
@@ -103,59 +111,56 @@ async function run() {
       res.send(result);
     });
 
-
     /*************** USER API */
     const userCollection = coffeeHub.collection("userCollection");
     // GET USERS ALL
-    app.get('/users',async(req,res)=>{
-      const query=userCollection.find()
-      const result=await query.toArray()
-      res.send(result)
-    })
+    app.get("/users", async (req, res) => {
+      const query = userCollection.find();
+      const result = await query.toArray();
+      res.send(result);
+    });
 
     // CREATE USER=> POST API
-    app.post('/users',async(req,res)=>{
-      const user=req.body;
-      console.log("Response from client to server:=>",user);
+    app.post("/users", async (req, res) => {
+      const user = req.body;
+      console.log("Response from client to server:=>", user);
       // send to DB
-      const result=await userCollection.insertOne(user)
+      const result = await userCollection.insertOne(user);
 
       //Final/last response to client
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     // DELETE (Single) api
-    app.delete('/users/:id',async(req,res)=>{
-      const id=req.params.id;
-      console.log('ID got from client=>',id);
+    app.delete("/users/:id", async (req, res) => {
+      const id = req.params.id;
+      console.log("ID got from client=>", id);
 
       // send delete instruction to DB
-      const query={_id:new ObjectId(id)}
-      const result=await userCollection.deleteOne(query)
+      const query = { _id: new ObjectId(id) };
+      const result = await userCollection.deleteOne(query);
 
-      res.send(result)
-    })
+      res.send(result);
+    });
 
     // UPDATE edit api: user
-    app.patch('/users',async(req,res)=>{
-      const email=req.body.email;
-      const query={email:email}
+    app.patch("/users", async (req, res) => {
+      const email = req.body.email;
+      const query = { email: email };
 
-      const updatedUser={
-        $set:{
-          email:email,
-          lastSignInTime:req.body.lastSignInTime
-        }
-      }
-      const result=await userCollection.updateOne(query,updatedUser)
+      const updatedUser = {
+        $set: {
+          email: email,
+          lastSignInTime: req.body.lastSignInTime,
+        },
+      };
+      const result = await userCollection.updateOne(query, updatedUser);
 
-      res.send(result)
-
-    })
-
+      res.send(result);
+    });
 
     // Send a ping to confirm a successful connection
-    await client.db("admin").command({ ping: 1 });
+    // await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
     );
